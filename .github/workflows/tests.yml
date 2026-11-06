@@ -1,0 +1,53 @@
+name: tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    env:
+      # the FICO data are downloaded (and cached) for the data tests
+      FICO_XML_DATA: ${{ github.workspace }}/.fico-data
+      FICO_XML_TEST_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Cache the FICO data
+        uses: actions/cache@v4
+        with:
+          path: .fico-data
+          key: fico-heloc-v1
+      - name: Install
+        run: uv sync --locked --python ${{ matrix.python-version }}
+      - name: Test
+        run: uv run --python ${{ matrix.python-version }} pytest -v
+
+  notebooks:
+    runs-on: ubuntu-latest
+    env:
+      FICO_XML_DATA: ${{ github.workspace }}/.fico-data
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Cache the FICO data
+        uses: actions/cache@v4
+        with:
+          path: .fico-data
+          key: fico-heloc-v1
+      - name: Install
+        run: uv sync --locked --group notebooks
+      - name: Download the data
+        run: uv run python -c "from fico_xml import data; data.download()"
+      - name: Run the notebooks
+        run: |
+          for notebook in notebooks/*.ipynb; do
+            (cd notebooks && uv run jupyter nbconvert --to notebook --execute --output /tmp/out.ipynb "$(basename "$notebook")")
+          done

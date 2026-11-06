@@ -1,0 +1,137 @@
+"""
+The decision tree whose decisions are explained.
+
+The model (see :data:`ORIGINAL_FINGERPRINT`) is a decision tree
+(``max_depth=7``, ``min_samples_leaf=100``) trained on the 10 count features of
+:data:`MODEL_FEATURES`, using the applicants for whom none of them is missing.
+"""
+import dataclasses
+import hashlib
+
+import numpy as np
+import pandas as pd
+from ctreex import Feature, FeatureSpec, TreeCounterfactualExplainer
+from sklearn.tree import DecisionTreeClassifier
+
+from fico_xml.data import feature_metadata
+
+__all__ = ['MODEL_FEATURES', 'ORIGINAL_PARAMETERS', 'ORIGINAL_FINGERPRINT',
+           'Model', 'model_data', 'train', 'fingerprint']
+
+#: The model features.
+MODEL_FEATURES = ['NumTotalTrades', 'NumSatisfactoryTrades',
+                  'NumTrades60Ever2DerogPubRec', 'NumTrades90Ever2DerogPubRec',
+                  'NumTradesOpeninLast12M', 'NumRevolvingTradesWBalance',
+                  'NumInstallTradesWBalance',
+                  'NumBank2NatlTradesWHighUtilization',
+                  'NumInqLast6Mexcl7days', 'NumInqLast7DCalc']
+#: The model parameters.
+ORIGINAL_PARAMETERS = {'max_depth': 7, 'min_samples_leaf': 100}
+#: SHA-256 of the structure of the original tree (see :func:`fingerprint`).
+ORIGINAL_FINGERPRINT = \
+    'b533568b05caef06dcad8830661156b8bfd5df87e587e1259880bc03d6aa7d5a'
+_LABELS = {'NumInqLast7DCalc': 'number of credit checks in the last 7 days'}
+
+
+def fingerprint(classifier):
+    """
+    SHA-256 of the structure of a fitted decision tree:
+    the features, thresholds and children of its nodes (no data).
+    """
+    tree = classifier.tree_
+    parts = [np.asarray(tree.children_left, dtype=np.int64),
+             np.asarray(tree.children_right, dtype=np.int64),
+             np.asarray(tree.feature, dtype=np.int64),
+             np.round(np.asarray(tree.threshold, dtype=np.float64), 9)]
+    digest = hashlib.sha256()
+    for part in parts:
+        digest.update(part.tobytes())
+    return digest.hexdigest()
+
+
+def model_data(clean_data, features=MODEL_FEATURES):
+    """
+    The training data of a model:
+    the given features of the applicants for whom none of them is missing.
+
+    Parameters
+    ----------
+    clean_data : fico_xml.preprocessing.CleanData
+
+    Returns
+    -------
+    X : pandas.DataFrame
+    y : pandas.Series
+    """
+    X = clean_data.data[list(features)]
+    complete = X.notnull().all(axis=1)
+    return X[complete], clean_data.target[complete]
+
+
+def _feature_spec(features):
+    meta = feature_metadata()['features']
+    return FeatureSpec(
+        [(f, None) for f in features],
+        features=[Feature(f, 'numerical',
+                          display_name=meta[f]['label'] if f in meta
+                          else _LABELS.get(f, f),
+                          integer=True)
+                  for f in features])
+
+
+@dataclasses.dataclass
+class Model(object):
+    """
+    A fitted decision tree and its counterfactual explainer.
+
+    Attributes
+    ----------
+    classifier : sklearn.tree.DecisionTreeClassifier
+    features : list of str
+        The features (in the order of the classifier's columns).
+    explainer : ctreex.TreeCounterfactualExplainer
+    """
+    classifier: DecisionTreeClassifier
+    features: list
+    explainer: TreeCounterfactualExplainer
+
+    def predict(self, X):
+        """Predicts the class (``Good``/``Bad``) of applicants."""
+        return self.classifier.predict(np.asarray(X[self.features],
+                                                  dtype=float))
+
+    def feature_importance(self):
+        """The (Gini) importance of the features, largest first."""
+        return pd.Series(self.classifier.feature_importances_,
+                         index=self.features,
+                         name='importance').sort_values(ascending=False)
+
+
+def train(clean_data, features=MODEL_FEATURES, random_state=0, **parameters):
+    """
+    Trains a decision tree.
+
+    Parameters
+    ----------
+    clean_data : fico_xml.preprocessing.CleanData
+    features : list of str
+    random_state : int
+        Seed of the tree
+        (scikit-learn breaks ties between equally good splits at random).
+    **parameters
+        Parameters of :class:`sklearn.tree.DecisionTreeClassifier` (default:
+        :data:`ORIGINAL_PARAMETERS`).
+
+    Returns
+    -------
+    Model
+    """
+    parameters = dict(ORIGINAL_PARAMETERS, **parameters) \
+        if not parameters else parameters
+    X, y = model_data(clean_data, features)
+    classifier = DecisionTreeClassifier(random_state=random_state,
+                                        **parameters)
+    classifier.fit(np.asarray(X, dtype=float), np.asarray(y, dtype=object))
+    explainer = TreeCounterfactualExplainer(classifier,
+                                            _feature_spec(list(features)))
+    return Model(classifier, list(features), explainer)

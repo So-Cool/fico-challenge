@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fico-xml"
+version = "0.0.1"
+description = "Explaining credit decisions on the FICO HELOC data (FICO Explainable Machine Learning Challenge) with decision trees and counterfactuals"
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [{ name = "Kacper Sokol", email = "k.sokol@bristol.ac.uk" }]
+requires-python = ">=3.11"
+dependencies = [
+    "ctreex[sklearn,plot]>=0.0.4",
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scikit-learn>=1.4",
+    "matplotlib>=3.7",
+]
+
+[project.optional-dependencies]
+# rendering trees with Graphviz (also needs the Graphviz programs)
+graphviz = [
+    "graphviz>=0.20",
+]
+
+[project.urls]
+Homepage = "https://github.com/So-Cool/fico-challenge"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+notebooks = [
+    "jupyterlab>=4",
+    "ipykernel>=6",
+    "nbconvert>=7",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.uv.sources]
+ctreex = { git = "https://github.com/So-Cool/ctreex", tag = "v0.0.4" }
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fico_xml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

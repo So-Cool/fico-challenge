@@ -1,0 +1,179 @@
+{
+ "description": "The features of the FICO HELOC data (heloc_dataset_v1.csv). description, monotonicity and categories: the official data dictionary (heloc_data_dictionary-2.xlsx); label: a plain-English name used in explanations.",
+ "target": {
+  "name": "RiskPerformance",
+  "description": "Paid as negotiated flag (12-36 Months). String of Good and Bad",
+  "classes": [
+   "Bad",
+   "Good"
+  ]
+ },
+ "special_values": {
+  "-9": "No Bureau Record or No Investigation",
+  "-8": "No Usable/Valid Trades or Inquiries",
+  "-7": "Condition not Met (e.g. No Inquiries, No Delinquencies)"
+ },
+ "features": {
+  "ExternalRiskEstimate": {
+   "description": "Consolidated version of risk markers",
+   "label": "external risk estimate",
+   "monotonicity": "Monotonically Decreasing",
+   "kind": "numerical"
+  },
+  "MSinceOldestTradeOpen": {
+   "description": "Months Since Oldest Trade Open",
+   "label": "number of months since the oldest credit account was opened",
+   "monotonicity": "Monotonically Decreasing",
+   "kind": "numerical"
+  },
+  "MSinceMostRecentTradeOpen": {
+   "description": "Months Since Most Recent Trade Open",
+   "label": "number of months since the most recent credit account was opened",
+   "monotonicity": "Monotonically Decreasing",
+   "kind": "numerical"
+  },
+  "AverageMInFile": {
+   "description": "Average Months in File",
+   "label": "average age of the credit accounts in months",
+   "monotonicity": "Monotonically Decreasing",
+   "kind": "numerical"
+  },
+  "NumSatisfactoryTrades": {
+   "description": "Number Satisfactory Trades",
+   "label": "number of credit accounts in good standing",
+   "monotonicity": "Monotonically Decreasing",
+   "kind": "numerical"
+  },
+  "NumTrades60Ever2DerogPubRec": {
+   "description": "Number Trades 60+ Ever",
+   "label": "number of credit accounts that were ever 60 or more days overdue",
+   "monotonicity": "Monotonically Increasing",
+   "kind": "numerical"
+  },
+  "NumTrades90Ever2DerogPubRec": {
+   "description": "Number Trades 90+ Ever",
+   "label": "number of credit accounts that were ever 90 or more days overdue",
+   "monotonicity": "Monotonically Increasing",
+   "kind": "numerical"
+  },
+  "PercentTradesNeverDelq": {
+   "description": "Percent Trades Never Delinquent",
+   "label": "percentage of credit accounts that were never overdue",
+   "monotonicity": "Monotonically Decreasing",
+   "kind": "numerical"
+  },
+  "MSinceMostRecentDelq": {
+   "description": "Months Since Most Recent Delinquency",
+   "label": "number of months since the most recent overdue payment",
+   "monotonicity": "Monotonically Decreasing",
+   "kind": "numerical"
+  },
+  "MaxDelq2PublicRecLast12M": {
+   "description": "Max Delq/Public Records Last 12 Months. See tab \"MaxDelq\" for each category",
+   "label": "worst payment delay in the last 12 months",
+   "monotonicity": "Values 0-7 are monotonically decreasing",
+   "kind": "ordinal",
+   "categories": {
+    "0": "derogatory comment",
+    "1": "120+ days delinquent",
+    "2": "90 days delinquent",
+    "3": "60 days delinquent",
+    "4": "30 days delinquent",
+    "5": "unknown delinquency",
+    "6": "unknown delinquency",
+    "7": "current and never delinquent",
+    "8": "all other",
+    "9": "all other"
+   }
+  },
+  "MaxDelqEver": {
+   "description": "Max Delinquency Ever. See tab \"MaxDelq\" for each category",
+   "label": "worst payment delay ever",
+   "monotonicity": "Values 2-8 are monotonically decreasing",
+   "kind": "ordinal",
+   "categories": {
+    "1": "no such value",
+    "2": "derogatory comment",
+    "3": "120+ days delinquent",
+    "4": "90 days delinquent",
+    "5": "60 days delinquent",
+    "6": "30 days delinquent",
+    "7": "unknown delinquency",
+    "8": "current and never delinquent",
+    "9": "all other"
+   }
+  },
+  "NumTotalTrades": {
+   "description": "Number of Total Trades (total number of credit accounts)",
+   "label": "total number of credit accounts",
+   "monotonicity": "No constraint",
+   "kind": "numerical"
+  },
+  "NumTradesOpeninLast12M": {
+   "description": "Number of Trades Open in Last 12 Months",
+   "label": "number of credit accounts opened in the last 12 months",
+   "monotonicity": "Monotonically Increasing",
+   "kind": "numerical"
+  },
+  "PercentInstallTrades": {
+   "description": "Percent Installment Trades",
+   "label": "percentage of credit accounts that are instalment loans",
+   "monotonicity": "No constraint",
+   "kind": "numerical"
+  },
+  "MSinceMostRecentInqexcl7days": {
+   "description": "Months Since Most Recent Inq excl 7days",
+   "label": "number of months since the most recent credit check (excluding the last 7 days)",
+   "monotonicity": "Monotonically Decreasing",
+   "kind": "numerical"
+  },
+  "NumInqLast6M": {
+   "description": "Number of Inq Last 6 Months",
+   "label": "number of credit checks in the last 6 months",
+   "monotonicity": "Monotonically Increasing",
+   "kind": "numerical"
+  },
+  "NumInqLast6Mexcl7days": {
+   "description": "Number of Inq Last 6 Months excl 7days. Excluding the last 7 days removes inquiries that are likely due to price comparision shopping.",
+   "label": "number of credit checks in the last 6 months (excluding the last 7 days)",
+   "monotonicity": "Monotonically Increasing",
+   "kind": "numerical"
+  },
+  "NetFractionRevolvingBurden": {
+   "description": "Net Fraction Revolving Burden. This is revolving balance divided by credit limit",
+   "label": "revolving balance as a percentage of the revolving credit limit",
+   "monotonicity": "Monotonically Increasing",
+   "kind": "numerical"
+  },
+  "NetFractionInstallBurden": {
+   "description": "Net Fraction Installment Burden. This is installment balance divided by original loan amount",
+   "label": "outstanding instalment balance as a percentage of the original loan amounts",
+   "monotonicity": "Monotonically Increasing",
+   "kind": "numerical"
+  },
+  "NumRevolvingTradesWBalance": {
+   "description": "Number Revolving Trades with Balance",
+   "label": "number of revolving accounts (credit cards, credit lines) with a balance",
+   "monotonicity": "No constraint",
+   "kind": "numerical"
+  },
+  "NumInstallTradesWBalance": {
+   "description": "Number Installment Trades with Balance",
+   "label": "number of instalment loans with a balance",
+   "monotonicity": "No constraint",
+   "kind": "numerical"
+  },
+  "NumBank2NatlTradesWHighUtilization": {
+   "description": "Number Bank/Natl Trades w high utilization ratio",
+   "label": "number of bank or national credit-card accounts with high utilisation",
+   "monotonicity": "Monotonically Increasing",
+   "kind": "numerical"
+  },
+  "PercentTradesWBalance": {
+   "description": "Percent Trades with Balance",
+   "label": "percentage of credit accounts with a balance",
+   "monotonicity": "No constraint",
+   "kind": "numerical"
+  }
+ }
+}
