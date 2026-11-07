@@ -69,5 +69,6 @@ def test_example_applicants(real_raw):
     first = explain(model, real_raw.loc[34], warn=False)
     assert first.prediction == 'Bad'
     assert first.contrastive[0].distance == 1
-    assert explain(model, real_raw.loc[678], warn=False).status == 'inconsistent record'
+    assert explain(model, real_raw.loc[678], warn=False).status == \
+        'inconsistent record'
     assert explain(model, real_raw.loc[7890], warn=False).prediction == 'Good'

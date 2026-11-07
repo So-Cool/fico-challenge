@@ -36,6 +36,17 @@ def test_explanations_change_the_prediction(model, raw):
         assert E.OUTCOMES[e.prediction] in e.text()
 
 
+def test_training_parameters(raw):
+    clean = preprocessing.clean(raw)
+    default = M.train(clean).classifier.get_params()
+    assert default['max_depth'] == 7 and default['min_samples_leaf'] == 100
+    # parameters override the original ones (the others are kept)
+    shallow = M.train(clean, max_depth=2).classifier.get_params()
+    assert shallow['max_depth'] == 2 and shallow['min_samples_leaf'] == 100
+    loose = M.train(clean, min_samples_leaf=1).classifier.get_params()
+    assert loose['max_depth'] == 7 and loose['min_samples_leaf'] == 1
+
+
 def test_options(model, raw):
     for i in raw.index[:30]:
         everything = E.explain(model, raw.loc[i], warn=False)

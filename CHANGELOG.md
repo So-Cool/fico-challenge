@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.3
+
+### Changes
+
+* **Training parameters.**
+  The parameters given to `fico_xml.model.train` now override the
+  corresponding parameters of the original tree (`ORIGINAL_PARAMETERS`) and
+  keep the others;
+  for example, `train(clean, max_depth=5)` still requires at least 100
+  applicants per leaf.
+  In 0.0.2 any parameter replaced all the original ones, so
+  `min_samples_leaf=100` was silently dropped.
+  The default and monotone trees are unchanged (they pass no parameters).
+
 ## 0.0.2
 
 ### Changes

@@ -150,15 +150,16 @@ def train(clean_data, features=MODEL_FEATURES, random_state=0, monotone=False,
         data dictionary (:data:`MONOTONICITY`);
         the default is the original (unconstrained) tree.
     **parameters
-        Parameters of :class:`sklearn.tree.DecisionTreeClassifier` (default:
-        :data:`ORIGINAL_PARAMETERS`).
+        Parameters of :class:`sklearn.tree.DecisionTreeClassifier`;
+        they override the corresponding :data:`ORIGINAL_PARAMETERS`
+        (e.g., ``max_depth=5`` keeps ``min_samples_leaf=100``;
+        pass ``min_samples_leaf=1`` to lift that limit too).
 
     Returns
     -------
     Model
     """
-    parameters = dict(ORIGINAL_PARAMETERS, **parameters) \
-        if not parameters else parameters
+    parameters = dict(ORIGINAL_PARAMETERS, **parameters)
     X, y = model_data(clean_data, features)
     if monotone:
         # scikit-learn constrains the probability of the positive class --
