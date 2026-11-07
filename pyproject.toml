@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fico-xml"
-version = "0.0.1"
+version = "0.0.2"
 description = "Explaining credit decisions on the FICO HELOC data (FICO Explainable Machine Learning Challenge) with decision trees and counterfactuals"
 readme = "README.md"
 license = "BSD-3-Clause"

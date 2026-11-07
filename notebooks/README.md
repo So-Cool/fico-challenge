@@ -11,12 +11,16 @@ tree and explains its decisions with counterfactual statements:
    values and simple baselines;
 2. [the **cleaning** notebook][cleaning] describes special values, consistency
    checks and engineered features;
-3. [the **the model** notebook][model] describes choosing the features and
-   the decision tree; and
+3. [the **model** notebook][model] describes choosing the features and
+   the decision tree;
 4. [the **explanations** notebook][explanations] describes why individual
-   applicants were assessed as they were and how the model works as a whole.
+   applicants were assessed as they were and how the model works as a whole;
+   and
+5. [the **monotone tree** notebook][monotone] trains a tree that respects the
+   monotonicity constraints of the data and compares it with the original one.
 
 [data]: ./01_data.ipynb
 [cleaning]: ./02_cleaning.ipynb
 [model]: ./03_model.ipynb
 [explanations]: ./04_explanations.ipynb
+[monotone]: ./05_monotone_tree.ipynb

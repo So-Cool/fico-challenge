@@ -15,7 +15,8 @@ from sklearn.tree import DecisionTreeClassifier
 
 from fico_xml.data import feature_metadata
 
-__all__ = ['MODEL_FEATURES', 'ORIGINAL_PARAMETERS', 'ORIGINAL_FINGERPRINT',
+__all__ = ['MODEL_FEATURES', 'MONOTONICITY', 'ACTIONABLE',
+           'ORIGINAL_PARAMETERS', 'ORIGINAL_FINGERPRINT',
            'Model', 'model_data', 'train', 'fingerprint']
 
 #: The model features.
@@ -31,6 +32,31 @@ ORIGINAL_PARAMETERS = {'max_depth': 7, 'min_samples_leaf': 100}
 ORIGINAL_FINGERPRINT = \
     'b533568b05caef06dcad8830661156b8bfd5df87e587e1259880bc03d6aa7d5a'
 _LABELS = {'NumInqLast7DCalc': 'number of credit checks in the last 7 days'}
+_CONSTRAINTS = {'Monotonically Increasing': 1, 'Monotonically Decreasing': -1}
+
+
+def _monotonicity():
+    meta = feature_metadata()['features']
+    out = {f: _CONSTRAINTS.get(meta[f]['monotonicity'], 0)
+           for f in MODEL_FEATURES if f in meta}
+    # engineered from the number of credit checks (monotonically increasing)
+    out['NumInqLast7DCalc'] = 1
+    return {f: out[f] for f in MODEL_FEATURES}
+
+
+#: How the risk (probability of ``Bad``) should change with every model
+#: feature according to the data dictionary: 1 for increases, -1 for
+#: decreases and 0 for no constraint.
+MONOTONICITY = _monotonicity()
+#: The model features an applicant can change and how:
+#: paying off balances and not applying for (or opening) new credit
+#: only *decrease* them.
+ACTIONABLE = {'NumRevolvingTradesWBalance': 'decrease',
+              'NumInstallTradesWBalance': 'decrease',
+              'NumBank2NatlTradesWHighUtilization': 'decrease',
+              'NumInqLast6Mexcl7days': 'decrease',
+              'NumInqLast7DCalc': 'decrease',
+              'NumTradesOpeninLast12M': 'decrease'}
 
 
 def fingerprint(classifier):
@@ -107,7 +133,8 @@ class Model(object):
                          name='importance').sort_values(ascending=False)
 
 
-def train(clean_data, features=MODEL_FEATURES, random_state=0, **parameters):
+def train(clean_data, features=MODEL_FEATURES, random_state=0, monotone=False,
+          **parameters):
     """
     Trains a decision tree.
 
@@ -118,6 +145,10 @@ def train(clean_data, features=MODEL_FEATURES, random_state=0, **parameters):
     random_state : int
         Seed of the tree
         (scikit-learn breaks ties between equally good splits at random).
+    monotone : bool
+        Constrain the tree to respect the monotonicity constraints of the
+        data dictionary (:data:`MONOTONICITY`);
+        the default is the original (unconstrained) tree.
     **parameters
         Parameters of :class:`sklearn.tree.DecisionTreeClassifier` (default:
         :data:`ORIGINAL_PARAMETERS`).
@@ -129,6 +160,11 @@ def train(clean_data, features=MODEL_FEATURES, random_state=0, **parameters):
     parameters = dict(ORIGINAL_PARAMETERS, **parameters) \
         if not parameters else parameters
     X, y = model_data(clean_data, features)
+    if monotone:
+        # scikit-learn constrains the probability of the positive class --
+        # i.e., the second class, Good -- which moves opposite to the risk
+        parameters = dict(parameters, monotonic_cst=[
+            -MONOTONICITY.get(f, 0) for f in features])
     classifier = DecisionTreeClassifier(random_state=random_state,
                                         **parameters)
     classifier.fit(np.asarray(X, dtype=float), np.asarray(y, dtype=object))

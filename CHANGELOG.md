@@ -1,5 +1,71 @@
 # Changelog
 
+## 0.0.2
+
+### Changes
+
+* **Accepted or declined.**
+  Explanations describe the outcome as *accepted* (`Good`) or *declined*
+  (`Bad`) -- e.g., "The application would be accepted had ..." -- instead of
+  the names of the classes.
+* **Wording.**
+  "Had the number of ... been at most 0." --> "Had there been no ..."
+* **Overdue accounts.**
+  The labels of the numbers of accounts ever 60 (90) or more days overdue now
+  mention that they include derogatory public records.
+* **Counterfactuals as objects.**
+  `Explanation.contrastive` and `Explanation.equivalent` hold
+  `Counterfactual` objects:
+  the described changes, the *closest* change (`values` captures the value of
+  every changed feature nearest to the applicant's), whether it gives a
+  consistent record (`consistent`) and which features it moves against their
+  monotonicity constraint (`contradicts_monotonicity`).
+* **Consistent counterfactuals.**
+  When `explain(..., consistent_only=True)` is set, counterfactuals keep the
+  features they do not change, which can give a record that contradicts itself
+  (e.g., fewer accounts 60 days overdue than 90 days overdue), which affects
+  about 42% of all the class-contrastive counterfactuals of the original tree;
+  the option keeps only the counterfactuals whose closest change passes the
+  consistency checks.
+* **Monotonicity.**
+  The original tree does not obey the monotonicity constraints of the data
+  dictionary, with about 42% of its class-contrastive counterfactuals moving a
+  feature against its constraint (e.g., *more* accounts opened in the last
+  12 months would lead to acceptance).
+  Such counterfactuals are flagged (noted in the text) and `explain` issues
+  a `MonotonicityWarning` (`warn=False` silences it).
+  `fico_xml.model.MONOTONICITY` holds the constraints (the number of credit
+  checks in the last 7 days, an engineered feature, is treated like the number
+  of credit checks).
+* **Actionable counterfactuals.**
+  When `explain(..., actionable_only=True)` is set, only class-contrastive
+  counterfactuals that change what an applicant can act on are generated.
+  Those include paying off balances and applying for or opening less credit
+  (the numbers of accounts with a balance, credit cards with high utilisation,
+  credit checks and accounts opened in the last 12 months, all listed in
+  `fico_xml.model.ACTIONABLE` and decreasing);
+  the history (overdue and total accounts, accounts in good standing)
+  cannot change.
+* **A monotone tree.**
+  The `model.train(..., monotone=True)` option trains a monotone tree and
+  the new notebook compares it with the original tree:
+  This new tree respects the constraints (no explanation needs a change against
+  them) at the cost of about two points of accuracy.
+* **"All other" delinquency code.**
+  The six applicants whose worst payment delay in the last 12 months is coded
+  "all other" (code 9) are recoded as "current and never delinquent", as in
+  the original code, which is justified by their records:
+  all of them are recorded as never delinquent everywhere else
+  (the worst payment delay ever, no months since a delinquency and 100% of
+  accounts never delinquent).
+* **Notebooks.**
+  Notebook 3 used the old names of the model constants and failed;
+  the volatility table of notebook 4 (eight leaves with the same value)
+  became a summary per class.
+* **Challenge URL.**
+  The README links the challenge announcement instead of the challenge website,
+  which no longer exists.
+
 ## 0.0.1
 
 ### Compatibility

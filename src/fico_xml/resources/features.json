@@ -46,13 +46,13 @@
   },
   "NumTrades60Ever2DerogPubRec": {
    "description": "Number Trades 60+ Ever",
-   "label": "number of credit accounts that were ever 60 or more days overdue",
+   "label": "number of credit accounts that were ever 60 or more days overdue or have a derogatory public record",
    "monotonicity": "Monotonically Increasing",
    "kind": "numerical"
   },
   "NumTrades90Ever2DerogPubRec": {
    "description": "Number Trades 90+ Ever",
-   "label": "number of credit accounts that were ever 90 or more days overdue",
+   "label": "number of credit accounts that were ever 90 or more days overdue or have a derogatory public record",
    "monotonicity": "Monotonically Increasing",
    "kind": "numerical"
   },

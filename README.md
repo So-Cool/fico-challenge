@@ -8,9 +8,10 @@ line of credit;
 every decision is explained with counterfactual statements computed by
 [CtreeX][ctreex]:
 
-> The application is assessed as Bad.
-> The application would be Good had the number of credit accounts that were
-> ever 60 or more days overdue been at most 0 (instead of 2).
+> The application is declined.
+> The application would be accepted had there been no credit accounts that
+> were ever 60 or more days overdue or have a derogatory public record
+> (instead of 2).
 
 Records without a credit history, records that contradict themselves and
 records missing a value that the model needs are not assessed;
@@ -33,9 +34,8 @@ credit bureau records and whether the loan was repaid as agreed
 (`Good` / `Bad`).
 The data can be sourced from:
 
-* the official FICO community
-  [explainable machine learning challenge][challenge] website
-  (registration required);
+* the official FICO community explainable machine learning challenge
+  (see the [announcement][announcement], registration required);
 * [Kaggle][kaggle] (the `heloc_dataset_v1 (1).csv` file, account required); or
 * the [5teffen/FICO-xML-Challenge][github-copy] GitHub repository
   (commit `056ca95`, default source) with `fico_xml.data.download()`;
@@ -75,6 +75,12 @@ explanation = explain(tree, raw.loc[34])      # one applicant's raw record
 print(explanation.text())
 explanation.contrastive                       # changes that flip the decision
 explanation.equivalent                        # changes that keep it
+
+# only consistent records; only changes the applicant can act on
+explain(tree, raw.loc[2], consistent_only=True, actionable_only=True)
+
+# a monotone tree
+model.train(preprocessing.clean(raw), monotone=True)
 ```
 
 ## Notebooks
@@ -84,10 +90,11 @@ tell the whole story:
 
 | Notebook | Content |
 |----------|---------|
-| `01_data`         | features, special values, baselines (external risk estimate alone reaches about 71% accuracy), delinquency and outcome |
-| `02_cleaning`     | special values, consistency checks (1,672 records contradict themselves), feature engineering |
-| `03_model`        | comparing models, ten count features, decision tree, feature importance |
-| `04_explanations` | explaining individual applicants, applicants that cannot be assessed, tree structure |
+| `01_data`          | features, special values, baselines (external risk estimate alone reaches about 71% accuracy), delinquency and outcome |
+| `02_cleaning`      | special values, consistency checks (1,672 records contradict themselves), feature engineering |
+| `03_model`         | comparing models, ten count features, decision tree, feature importance |
+| `04_explanations`  | explaining individual applicants, monotonicity, consistent and actionable counterfactuals, applicants that cannot be assessed, tree structure |
+| `05_monotone_tree` | a tree that respects the monotonicity constraints, compared with the original one |
 
 To run them:
 
@@ -123,7 +130,6 @@ when `FICO_XML_TEST_DOWNLOAD=1` is set.
 The [changelog](CHANGELOG.md) lists the code fixes and validation.
 
 [announcement]: https://community.fico.com/s/blog-post/a5Q8000000082UQEAY/fico1158
-[challenge]: https://community.fico.com/s/explainable-machine-learning-challenge
 [ctreex]: https://github.com/So-Cool/ctreex
 [github-copy]: https://github.com/5teffen/FICO-xML-Challenge/tree/056ca9505910db184c10d20457551ab48925e317/xML%20Challenge%20Dataset%20and%20Data%20Dictionary
 [kaggle]: https://www.kaggle.com/datasets/averkiyoliabev/home-equity-line-of-creditheloc

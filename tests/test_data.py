@@ -66,8 +66,8 @@ def test_reproduces_original_model(real_raw):
 def test_example_applicants(real_raw):
     from fico_xml.explain import explain
     model = M.train(pp.clean(real_raw))
-    first = explain(model, real_raw.loc[34])
+    first = explain(model, real_raw.loc[34], warn=False)
     assert first.prediction == 'Bad'
-    assert first.contrastive[0][0] == 1
-    assert explain(model, real_raw.loc[678]).status == 'inconsistent record'
-    assert explain(model, real_raw.loc[7890]).prediction == 'Good'
+    assert first.contrastive[0].distance == 1
+    assert explain(model, real_raw.loc[678], warn=False).status == 'inconsistent record'
+    assert explain(model, real_raw.loc[7890], warn=False).prediction == 'Good'
